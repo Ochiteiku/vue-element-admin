@@ -7,22 +7,22 @@
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">
-            New Visits
+            家庭成员数
           </div>
-          <count-to :start-val="0" :end-val="102400" :duration="2600" class="card-panel-num" />
+          <count-to :start-val="0" :end-val="familyMembersCount" :duration="2600" class="card-panel-num" />
         </div>
       </div>
     </el-col>
     <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
       <div class="card-panel" @click="handleSetLineChartData('messages')">
         <div class="card-panel-icon-wrapper icon-message">
-          <svg-icon icon-class="message" class-name="card-panel-icon" />
+          <svg-icon icon-class="money" class-name="card-panel-icon" />
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">
-            Messages
+            本月收入
           </div>
-          <count-to :start-val="0" :end-val="81212" :duration="3000" class="card-panel-num" />
+          <count-to :start-val="0" :end-val="monthlyIncome" :duration="3000" class="card-panel-num" />
         </div>
       </div>
     </el-col>
@@ -33,9 +33,9 @@
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">
-            Purchases
+            本月支出
           </div>
-          <count-to :start-val="0" :end-val="9280" :duration="3200" class="card-panel-num" />
+          <count-to :start-val="0" :end-val="monthlyOutlay" :duration="3200" class="card-panel-num" />
         </div>
       </div>
     </el-col>
@@ -46,9 +46,9 @@
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">
-            Shoppings
+            累计盈余
           </div>
-          <count-to :start-val="0" :end-val="13600" :duration="3600" class="card-panel-num" />
+          <count-to :start-val="0" :end-val="totalSurplus" :duration="3600" class="card-panel-num" />
         </div>
       </div>
     </el-col>
@@ -56,15 +56,42 @@
 </template>
 
 <script>
+import axios from 'axios'
 import CountTo from 'vue-count-to'
 
 export default {
   components: {
     CountTo
   },
+  data() {
+    return {
+      familyMembersCount: 0,
+      monthlyIncome: 0,
+      monthlyOutlay: 0,
+      totalSurplus: 0
+    }
+  },
+  mounted() {
+    this.fetchData()
+  },
   methods: {
     handleSetLineChartData(type) {
       this.$emit('handleSetLineChartData', type)
+    },
+    async fetchData() {
+      try {
+        const familyMembersResponse = await axios.get('http://127.0.0.1:5000/api/family_members/count')
+        const incomeResponse = await axios.get('http://127.0.0.1:5000/api/income/total/month')
+        const outlayResponse = await axios.get('http://127.0.0.1:5000/api/outlay/total/month')
+        const surplusResponse = await axios.get('http://127.0.0.1:5000/api/surplus/total')
+
+        this.familyMembersCount = familyMembersResponse.data.count
+        this.monthlyIncome = incomeResponse.data.total_income
+        this.monthlyOutlay = outlayResponse.data.total_outlay
+        this.totalSurplus = surplusResponse.data.surplus
+      } catch (error) {
+        console.error('Error fetching data', error)
+      }
     }
   }
 }
@@ -107,7 +134,7 @@ export default {
       }
 
       .icon-shopping {
-        background: #34bfa3
+        background: #FC7C0E
       }
     }
 
@@ -124,7 +151,7 @@ export default {
     }
 
     .icon-shopping {
-      color: #34bfa3
+      color: #FC7C0E
     }
 
     .card-panel-icon-wrapper {
