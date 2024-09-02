@@ -6,6 +6,7 @@
 import echarts from 'echarts'
 require('echarts/theme/macarons') // echarts theme
 import resize from './mixins/resize'
+import axios from 'axios' // 引入axios库用于请求数据
 
 const animationDuration = 6000
 
@@ -22,47 +23,82 @@ export default {
     },
     height: {
       type: String,
-      default: '300px'
+      default: '400px'
     }
   },
   data() {
     return {
-      chart: null
+      chart: null,
+      apiUrl: 'http://127.0.0.1:5000/api/weekly_outlay_by_category' // API URL
     }
   },
   mounted() {
     this.$nextTick(() => {
-      this.initChart()
+      this.fetchData()
     })
   },
   beforeDestroy() {
-    if (!this.chart) {
-      return
+    if (this.chart) {
+      this.chart.dispose()
+      this.chart = null
     }
-    this.chart.dispose()
-    this.chart = null
   },
   methods: {
-    initChart() {
+    fetchData() {
+      axios.get(this.apiUrl)
+        .then(response => {
+          const data = response.data
+          this.initChart(data)
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error)
+        })
+    },
+    initChart(data) {
+      const categories = data[0].daily_outlays.map(outlay => outlay.date) // 获取日期
+      const seriesData = data.map(person => ({
+        name: person.name,
+        type: 'bar',
+        stack: 'vistors',
+        barWidth: '60%',
+        data: person.daily_outlays.map(outlay => outlay.total_outlay),
+        animationDuration
+      }))
+
       this.chart = echarts.init(this.$el, 'macarons')
 
       this.chart.setOption({
+        title: {
+          text: '近七天家庭成员支出',
+          left: 'left',
+          top: 'top',
+          textStyle: {
+            fontFamily: 'Microsoft YaHei',
+            fontSize: 18,
+            fontWeight: 'bold'
+          }
+        },
         tooltip: {
           trigger: 'axis',
           axisPointer: { // 坐标轴指示器，坐标轴触发有效
             type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
           }
         },
+        legend: {
+          left: 'center',
+          bottom: '20',
+          data: data.map(person => person.name) // 使用API数据中的名字
+        },
         grid: {
-          top: 10,
+          top: 70,
           left: '2%',
           right: '2%',
-          bottom: '3%',
+          bottom: '15%',
           containLabel: true
         },
         xAxis: [{
           type: 'category',
-          data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+          data: categories,
           axisTick: {
             alignWithLabel: true
           }
@@ -73,28 +109,7 @@ export default {
             show: false
           }
         }],
-        series: [{
-          name: 'pageA',
-          type: 'bar',
-          stack: 'vistors',
-          barWidth: '60%',
-          data: [79, 52, 200, 334, 390, 330, 220],
-          animationDuration
-        }, {
-          name: 'pageB',
-          type: 'bar',
-          stack: 'vistors',
-          barWidth: '60%',
-          data: [80, 52, 200, 334, 390, 330, 220],
-          animationDuration
-        }, {
-          name: 'pageC',
-          type: 'bar',
-          stack: 'vistors',
-          barWidth: '60%',
-          data: [30, 52, 200, 334, 390, 330, 220],
-          animationDuration
-        }]
+        series: seriesData // 使用从API获取的数据
       })
     }
   }

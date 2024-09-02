@@ -6,6 +6,7 @@
 import echarts from 'echarts'
 require('echarts/theme/macarons') // echarts theme
 import resize from './mixins/resize'
+import axios from 'axios' // 引入axios库用于请求数据
 
 export default {
   mixins: [resize],
@@ -20,54 +21,73 @@ export default {
     },
     height: {
       type: String,
-      default: '300px'
+      default: '400px'
     }
   },
   data() {
     return {
-      chart: null
+      chart: null,
+      apiUrl: 'http://127.0.0.1:5000/api/family_total_outlay_by_category' // API URL
     }
   },
   mounted() {
     this.$nextTick(() => {
-      this.initChart()
+      this.fetchData()
     })
   },
   beforeDestroy() {
-    if (!this.chart) {
-      return
+    if (this.chart) {
+      this.chart.dispose()
+      this.chart = null
     }
-    this.chart.dispose()
-    this.chart = null
   },
   methods: {
-    initChart() {
+    fetchData() {
+      axios.get(this.apiUrl)
+        .then(response => {
+          const data = response.data
+          this.initChart(data)
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error)
+        })
+    },
+    initChart(data) {
+      const chartData = data.map(item => ({
+        value: item.TotalOutlay,
+        name: item.CategoryName
+      }))
+
       this.chart = echarts.init(this.$el, 'macarons')
 
       this.chart.setOption({
+        title: {
+          text: '本月家庭支出',
+          left: 'left',
+          top: 'top',
+          textStyle: {
+            fontFamily: 'Microsoft YaHei',
+            fontSize: 18,
+            fontWeight: 'bold'
+          }
+        },
         tooltip: {
           trigger: 'item',
           formatter: '{a} <br/>{b} : {c} ({d}%)'
         },
         legend: {
           left: 'center',
-          bottom: '10',
-          data: ['Industries', 'Technology', 'Forex', 'Gold', 'Forecasts']
+          bottom: '20',
+          data: chartData.map(item => item.name) // 使用从API获取的类别数据
         },
         series: [
           {
-            name: 'WEEKLY WRITE ARTICLES',
+            name: '家庭支出',
             type: 'pie',
             roseType: 'radius',
-            radius: [15, 95],
-            center: ['50%', '38%'],
-            data: [
-              { value: 320, name: 'Industries' },
-              { value: 240, name: 'Technology' },
-              { value: 149, name: 'Forex' },
-              { value: 100, name: 'Gold' },
-              { value: 59, name: 'Forecasts' }
-            ],
+            radius: [20, 115],
+            center: ['50%', '48%'],
+            data: chartData, // 使用从API获取的数据
             animationEasing: 'cubicInOut',
             animationDuration: 2600
           }

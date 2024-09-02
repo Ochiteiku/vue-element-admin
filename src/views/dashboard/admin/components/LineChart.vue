@@ -20,7 +20,7 @@ export default {
     },
     height: {
       type: String,
-      default: '350px'
+      default: '450px'
     },
     autoResize: {
       type: Boolean,
@@ -63,6 +63,17 @@ export default {
     },
     setOptions({ expectedData, actualData } = {}) {
       this.chart.setOption({
+        title: {
+          text: '近七天家庭收支',
+          top: '25px',
+          left: 'center',
+          textStyle: {
+            color: '#003366',
+            fontFamily: 'Microsoft YaHei',
+            fontWeight: 'bold',
+            fontSize: 30
+          }
+        },
         xAxis: {
           data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
           boundaryGap: false,
@@ -73,8 +84,8 @@ export default {
         grid: {
           left: 10,
           right: 10,
-          bottom: 20,
-          top: 30,
+          bottom: 0,
+          top: 110,
           containLabel: true
         },
         tooltip: {
@@ -90,10 +101,11 @@ export default {
           }
         },
         legend: {
-          data: ['expected', 'actual']
+          top: 70,
+          data: ['收入', '支出']
         },
         series: [{
-          name: 'expected', itemStyle: {
+          name: '收入', itemStyle: {
             normal: {
               color: '#FF005A',
               lineStyle: {
@@ -109,7 +121,7 @@ export default {
           animationEasing: 'cubicInOut'
         },
         {
-          name: 'actual',
+          name: '支出',
           smooth: true,
           type: 'line',
           itemStyle: {

@@ -3,7 +3,7 @@
 
     <panel-group @handleSetLineChartData="handleSetLineChartData" />
 
-    <el-row style="background:#fff;padding:50px 16px 0;margin-bottom:32px;height:500px;">
+    <el-row style="background:#fff;padding:0px 16px 0;margin-bottom:32px;height:500px;">
       <line-chart :chart-data="lineChartData" />
     </el-row>
 
@@ -33,25 +33,7 @@ import LineChart from './components/LineChart'
 import RaddarChart from './components/RaddarChart'
 import PieChart from './components/PieChart'
 import BarChart from './components/BarChart'
-
-const lineChartData = {
-  newVisitis: {
-    expectedData: [100, 120, 161, 134, 105, 160, 165],
-    actualData: [120, 82, 91, 154, 162, 140, 145]
-  },
-  messages: {
-    expectedData: [200, 192, 120, 144, 160, 130, 140],
-    actualData: [180, 160, 151, 106, 145, 150, 130]
-  },
-  purchases: {
-    expectedData: [80, 100, 121, 104, 105, 90, 100],
-    actualData: [120, 90, 100, 138, 142, 130, 130]
-  },
-  shoppings: {
-    expectedData: [130, 140, 141, 142, 145, 150, 160],
-    actualData: [120, 82, 91, 154, 162, 140, 130]
-  }
-}
+import axios from 'axios' // 引入axios库用于请求数据
 
 export default {
   name: 'DashboardAdmin',
@@ -64,12 +46,32 @@ export default {
   },
   data() {
     return {
-      lineChartData: lineChartData.newVisitis
+      lineChartData: {
+        expectedData: [],
+        actualData: []
+      }
     }
   },
+  mounted() {
+    this.fetchData()
+  },
   methods: {
+    fetchData() {
+      axios.get('http://127.0.0.1:5000/api/weekly_income_outlay')
+        .then(response => {
+          const data = response.data
+          this.lineChartData = {
+            expectedData: data.map(item => item.total_income),
+            actualData: data.map(item => item.total_outlay)
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error)
+        })
+    },
     handleSetLineChartData(type) {
-      this.lineChartData = lineChartData[type]
+      // 根据业务逻辑可能需要对数据进行一些额外处理
+      // 但在这个场景中，只需要一组数据，因此不需要处理。
     }
   }
 }

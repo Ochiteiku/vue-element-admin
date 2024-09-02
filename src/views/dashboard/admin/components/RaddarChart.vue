@@ -6,6 +6,7 @@
 import echarts from 'echarts'
 require('echarts/theme/macarons') // echarts theme
 import resize from './mixins/resize'
+import axios from 'axios' // 引入axios库用于请求数据
 
 const animationDuration = 3000
 
@@ -22,17 +23,18 @@ export default {
     },
     height: {
       type: String,
-      default: '300px'
+      default: '400px'
     }
   },
   data() {
     return {
-      chart: null
+      chart: null,
+      apiUrl: 'http://127.0.0.1:5000/api/outlay/total/by_category' // API URL
     }
   },
   mounted() {
     this.$nextTick(() => {
-      this.initChart()
+      this.fetchData()
     })
   },
   beforeDestroy() {
@@ -43,14 +45,34 @@ export default {
     this.chart = null
   },
   methods: {
-    initChart() {
+    fetchData() {
+      axios.get(this.apiUrl)
+        .then(response => {
+          const data = response.data
+          this.initChart(data)
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error)
+        })
+    },
+    initChart(data) {
       this.chart = echarts.init(this.$el, 'macarons')
 
       this.chart.setOption({
+        title: {
+          text: '本月家庭成员支出',
+          left: 'left',
+          top: 'top',
+          textStyle: {
+            fontFamily: 'Microsoft YaHei',
+            fontSize: 18,
+            fontWeight: 'bold'
+          }
+        },
         tooltip: {
           trigger: 'axis',
-          axisPointer: { // 坐标轴指示器，坐标轴触发有效
-            type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
+          axisPointer: {
+            type: 'shadow'
           }
         },
         radar: {
@@ -68,18 +90,18 @@ export default {
             }
           },
           indicator: [
-            { name: 'Sales', max: 10000 },
-            { name: 'Administration', max: 20000 },
-            { name: 'Information Technology', max: 20000 },
-            { name: 'Customer Support', max: 20000 },
-            { name: 'Development', max: 20000 },
-            { name: 'Marketing', max: 20000 }
+            { name: '生活支出', max: 5000 },
+            { name: '交通支出', max: 5000 },
+            { name: '饮食支出', max: 5000 },
+            { name: '教育支出', max: 5000 },
+            { name: '娱乐支出', max: 5000 },
+            { name: '医疗支出', max: 5000 }
           ]
         },
         legend: {
           left: 'center',
-          bottom: '10',
-          data: ['Allocated Budget', 'Expected Spending', 'Actual Spending']
+          bottom: '20',
+          data: data.map(item => item.name) // 使用API数据中的名字
         },
         series: [{
           type: 'radar',
@@ -93,20 +115,10 @@ export default {
               opacity: 1
             }
           },
-          data: [
-            {
-              value: [5000, 7000, 12000, 11000, 15000, 14000],
-              name: 'Allocated Budget'
-            },
-            {
-              value: [4000, 9000, 15000, 15000, 13000, 11000],
-              name: 'Expected Spending'
-            },
-            {
-              value: [5500, 11000, 12000, 15000, 12000, 12000],
-              name: 'Actual Spending'
-            }
-          ],
+          data: data.map(item => ({
+            value: item.value,
+            name: item.name
+          })),
           animationDuration: animationDuration
         }]
       })
