@@ -84,6 +84,18 @@ export const constantRoutes = [
     ]
   },
   {
+    path: '/tree',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/tree/index'),
+        name: 'tree',
+        meta: { title: '收支分类', icon: 'list' }
+      }
+    ]
+  },
+  {
     path: '/documentation',
     component: Layout,
     children: [
