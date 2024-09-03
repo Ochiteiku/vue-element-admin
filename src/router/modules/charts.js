@@ -8,7 +8,7 @@ const chartsRouter = {
   redirect: 'noRedirect',
   name: 'Charts',
   meta: {
-    title: 'Charts',
+    title: '数据统计',
     icon: 'chart'
   },
   children: [
@@ -28,7 +28,7 @@ const chartsRouter = {
       path: 'mix-chart',
       component: () => import('@/views/charts/mix-chart'),
       name: 'MixChart',
-      meta: { title: 'Mix Chart', noCache: true }
+      meta: { title: '每日收/支', noCache: true }
     }
   ]
 }

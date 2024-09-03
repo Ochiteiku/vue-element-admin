@@ -5,6 +5,7 @@
 <script>
 import echarts from 'echarts'
 import resize from './mixins/resize'
+import axios from 'axios'
 
 export default {
   mixins: [resize],
@@ -42,19 +43,84 @@ export default {
     this.chart = null
   },
   methods: {
-    initChart() {
+    async initChart() {
       this.chart = echarts.init(document.getElementById(this.id))
-      const xData = (function() {
-        const data = []
-        for (let i = 1; i < 13; i++) {
-          data.push(i + 'month')
-        }
-        return data
-      }())
+
+      // 从API获取每日家庭成员支出数据
+      const outlayResponse = await axios.get('http://127.0.0.1:5000/api/daily_outlay_by_member')
+      const outlayData = outlayResponse.data
+
+      // 从API获取每日家庭总收入数据
+      const incomeResponse = await axios.get('http://127.0.0.1:5000/api/daily_income')
+      const incomeData = incomeResponse.data
+
+      // 处理获取的数据
+      const xData = outlayData.map(item => item.Date)
+      const seriesData = {}
+      const incomeSeriesData = incomeData.map(item => item.TotalIncome)
+
+      outlayData.forEach(item => {
+        item.Details.forEach(detail => {
+          if (!seriesData[detail.MemberName]) {
+            seriesData[detail.MemberName] = []
+          }
+          seriesData[detail.MemberName].push(detail.TotalOutlay)
+        })
+      })
+
+      // 定义五个家庭成员的颜色，体现渐变效果
+      const colors = [
+        'rgba(255, 99, 132, 1)',
+        'rgba(255, 159, 64, 1)',
+        'rgba(255, 205, 86, 1)',
+        'rgba(75, 192, 192, 1)',
+        'rgba(54, 162, 235, 1)'
+      ]
+
+      const series = Object.keys(seriesData).map((memberName, index) => ({
+        name: memberName,
+        type: 'bar',
+        stack: '总量',
+        barMaxWidth: 35,
+        itemStyle: {
+          normal: {
+            color: colors[index % colors.length], // 为每个成员分配不同的颜色
+            label: {
+              show: true,
+              position: 'insideTop',
+              formatter(p) {
+                return p.value > 0 ? p.value : ''
+              }
+            }
+          }
+        },
+        data: seriesData[memberName]
+      }))
+
+      series.push({
+        name: '家庭总收入',
+        type: 'line',
+        symbolSize: 10,
+        symbol: 'circle',
+        itemStyle: {
+          normal: {
+            color: '#FFFFFF',
+            label: {
+              show: true,
+              position: 'top',
+              formatter(p) {
+                return p.value > 0 ? p.value : ''
+              }
+            }
+          }
+        },
+        data: incomeSeriesData
+      })
+
       this.chart.setOption({
         backgroundColor: '#344b58',
         title: {
-          text: 'statistics',
+          text: '家庭支出与收入统计',
           x: '20',
           top: '20',
           textStyle: {
@@ -90,7 +156,7 @@ export default {
           textStyle: {
             color: '#90979c'
           },
-          data: ['female', 'male', 'average']
+          data: [...Object.keys(seriesData), '家庭总收入']
         },
         calculable: true,
         xAxis: [{
@@ -111,7 +177,6 @@ export default {
           },
           axisLabel: {
             interval: 0
-
           },
           data: xData
         }],
@@ -138,9 +203,7 @@ export default {
         dataZoom: [{
           show: true,
           height: 30,
-          xAxisIndex: [
-            0
-          ],
+          xAxisIndex: [0],
           bottom: 30,
           start: 10,
           end: 80,
@@ -148,12 +211,11 @@ export default {
           handleSize: '110%',
           handleStyle: {
             color: '#d3dee5'
-
           },
           textStyle: {
-            color: '#fff' },
+            color: '#fff'
+          },
           borderColor: '#90979c'
-
         }, {
           type: 'inside',
           show: true,
@@ -161,109 +223,7 @@ export default {
           start: 1,
           end: 35
         }],
-        series: [{
-          name: 'female',
-          type: 'bar',
-          stack: 'total',
-          barMaxWidth: 35,
-          barGap: '10%',
-          itemStyle: {
-            normal: {
-              color: 'rgba(255,144,128,1)',
-              label: {
-                show: true,
-                textStyle: {
-                  color: '#fff'
-                },
-                position: 'insideTop',
-                formatter(p) {
-                  return p.value > 0 ? p.value : ''
-                }
-              }
-            }
-          },
-          data: [
-            709,
-            1917,
-            2455,
-            2610,
-            1719,
-            1433,
-            1544,
-            3285,
-            5208,
-            3372,
-            2484,
-            4078
-          ]
-        },
-
-        {
-          name: 'male',
-          type: 'bar',
-          stack: 'total',
-          itemStyle: {
-            normal: {
-              color: 'rgba(0,191,183,1)',
-              barBorderRadius: 0,
-              label: {
-                show: true,
-                position: 'top',
-                formatter(p) {
-                  return p.value > 0 ? p.value : ''
-                }
-              }
-            }
-          },
-          data: [
-            327,
-            1776,
-            507,
-            1200,
-            800,
-            482,
-            204,
-            1390,
-            1001,
-            951,
-            381,
-            220
-          ]
-        }, {
-          name: 'average',
-          type: 'line',
-          stack: 'total',
-          symbolSize: 10,
-          symbol: 'circle',
-          itemStyle: {
-            normal: {
-              color: 'rgba(252,230,48,1)',
-              barBorderRadius: 0,
-              label: {
-                show: true,
-                position: 'top',
-                formatter(p) {
-                  return p.value > 0 ? p.value : ''
-                }
-              }
-            }
-          },
-          data: [
-            1036,
-            3693,
-            2962,
-            3810,
-            2519,
-            1915,
-            1748,
-            4675,
-            6209,
-            4323,
-            2865,
-            4298
-          ]
-        }
-        ]
+        series: series
       })
     }
   }
