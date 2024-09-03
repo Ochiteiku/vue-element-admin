@@ -3,7 +3,7 @@
 
     <panel-group @handleSetLineChartData="handleSetLineChartData" />
 
-    <el-row style="background:#fff;padding:0px 16px 0;margin-bottom:32px;height:500px;">
+    <el-row style="background:#fff;padding:0px 16px 0;margin-bottom:37px;height:500px;">
       <line-chart :chart-data="lineChartData" />
     </el-row>
 
