@@ -29,6 +29,12 @@ const chartsRouter = {
       component: () => import('@/views/charts/mix-chart'),
       name: 'MixChart',
       meta: { title: '每日收/支', noCache: true }
+    },
+    {
+      path: 'data-all',
+      component: () => import('@/views/charts/data-all'),
+      name: 'DataAll',
+      meta: { title: '财务总览', noCache: true }
     }
   ]
 }

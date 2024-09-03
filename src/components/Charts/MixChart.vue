@@ -120,7 +120,7 @@ export default {
       this.chart.setOption({
         backgroundColor: '#344b58',
         title: {
-          text: '家庭支出与收入统计',
+          text: '家庭每日支出与收入统计',
           x: '20',
           top: '20',
           textStyle: {

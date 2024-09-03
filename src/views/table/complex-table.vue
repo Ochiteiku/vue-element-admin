@@ -54,6 +54,16 @@
       <el-button class="filter-item" style="margin-left: 0px;" type="primary" icon="el-icon-edit" @click="handleCreate">
         添加记录
       </el-button>
+      <!-- 占用剩余空间 -->
+      <div style="flex-grow: 1;" />
+      <!-- 显示总金额的标签 -->
+      <el-tag
+        v-if="totalAmount !== null"
+        type="info"
+        style="height: 37px; display: flex; align-items: center; font-size: 14px; color: #666666; border: 1px solid #a0cfff; background-color: #f0f8ff; border-radius: 4px;"
+      >
+        筛选总金额: {{ totalAmount }}
+      </el-tag>
     </div>
 
     <!-- 表格 -->
@@ -287,6 +297,9 @@ export default {
       // 更新筛选后的数据
       this.total = filteredList.length
       this.list = filteredList.slice((this.listQuery.page - 1) * this.listQuery.limit, this.listQuery.page * this.listQuery.limit)
+
+      // 计算筛选后的总金额
+      this.totalAmount = filteredList.reduce((total, item) => total + item.Amount, 0)
     },
 
     // 获取所选分类及其所有子分类的显示名称
