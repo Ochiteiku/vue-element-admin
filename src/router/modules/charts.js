@@ -22,7 +22,7 @@ const chartsRouter = {
       path: 'data-all',
       component: () => import('@/views/charts/data-all'),
       name: 'DataAll',
-      meta: { title: '财务总览', noCache: true }
+      meta: { title: 'AI财务分析', noCache: true }
     }
   ]
 }

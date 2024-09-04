@@ -90,12 +90,12 @@ export default {
             }
           },
           indicator: [
-            { name: '生活支出', max: 5000 },
-            { name: '交通支出', max: 5000 },
-            { name: '饮食支出', max: 5000 },
-            { name: '教育支出', max: 5000 },
-            { name: '娱乐支出', max: 5000 },
-            { name: '医疗支出', max: 5000 }
+            { name: '生活支出', max: 8000 },
+            { name: '交通支出', max: 8000 },
+            { name: '饮食支出', max: 8000 },
+            { name: '教育支出', max: 8000 },
+            { name: '娱乐支出', max: 8000 },
+            { name: '医疗支出', max: 8000 }
           ]
         },
         legend: {

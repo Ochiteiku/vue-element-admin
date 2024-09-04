@@ -95,6 +95,18 @@ export const constantRoutes = [
   },
   tableRouter,
   chartsRouter,
+  {
+    path: '/property',
+    component: Layout,
+    children: [
+      {
+        path: 'property',
+        component: () => import('@/views/property/index'),
+        name: 'property',
+        meta: { title: '房产管理', icon: 'zip' }
+      }
+    ]
+  },
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }
 ]
